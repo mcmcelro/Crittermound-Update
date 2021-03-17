@@ -36,7 +36,7 @@ function Shuffle(n)
 }
 var ticksPerSecond=20,game,GameController=function()
 	{
-	function n()
+	function gameModel()
 		{
 		this.generations=ko.observable(0);
 		this.sorts=["score","base","bonus","vitality","strength","agility","bite","sting","mutations","mine","farm","carry","factory"];
@@ -608,7 +608,7 @@ var ticksPerSecond=20,game,GameController=function()
 		this.achievements.push(new Achievement(22,"Find 15 Forts","Find 15 Forts",15));
 		this.achievements.push(new Achievement(22,"Find 18 Forts","Find 18 Forts",18))
 	}
-	return n.prototype.Tick=function()
+	return gameModel.prototype.Tick=function()
 		{
 		this.BreedCheck(!1);
 		this.AutoBattle();
@@ -618,7 +618,7 @@ var ticksPerSecond=20,game,GameController=function()
 		this.CheckAchievements();
 		this.CheckSave()
 	}
-	,n.prototype.UpdateProduction=function()
+	,gameModel.prototype.UpdateProduction=function()
 		{
 		for(var t,i,r,u=0,n=0;
 		n<this.farmMound().length;
@@ -635,7 +635,7 @@ var ticksPerSecond=20,game,GameController=function()
 		this.sodPerSecondRaw(r*(1+this.bonusFactoryPercent()/100));
 		this.achievementCounts[16].Update(this.sodPerSecondRaw())
 	}
-	,n.prototype.CalculateProduction=function()
+	,gameModel.prototype.CalculateProduction=function()
 		{
 		var t,i,n,r;
 		this.dirtRaw(this.dirtRaw()+this.dirtPerSecondRaw()/ticksPerSecond);
@@ -662,7 +662,7 @@ var ticksPerSecond=20,game,GameController=function()
 		this.sodPerSecondForBreeding(SmartRound(this.factorySodPerSecond()*(this.sodDedicatedToBreeding()/100)));
 		this.AnimateWorkers()
 	}
-	,n.prototype.BreedCheck=function(n)
+	,gameModel.prototype.BreedCheck=function(n)
 		{
 		if(n||this.father().currentHealth()>=this.father().health&&this.mother().currentHealth()>=this.mother().health?(this.Breed(this.mother(),this.father(),"Royal"),!n&&this.boosts()<this.maxBoosts()&&this.boosts(Math.round((this.boosts()+.1)*10)/10)):this.pauseBreeding()||(this.mother().currentHealth(this.mother().currentHealth()+this.mother().health/this.mother().actionTime),this.father().currentHealth(this.father().currentHealth()+this.father().health/this.father().actionTime)),this.prince().currentHealth()>=this.prince().health&&this.princess().currentHealth()>=this.princess().health)this.Breed(this.princess(),this.prince(),"Heir");
 		else if(this.sodDedicatedToBreeding()>0)
@@ -674,7 +674,7 @@ var ticksPerSecond=20,game,GameController=function()
 			this.sodRaw(this.sodRaw()-r)
 		}
 	}
-	,n.prototype.Breed=function(n,t,i)
+	,gameModel.prototype.Breed=function(n,t,i)
 		{
 		var c,y,u,l,f,h,a,v,s,p,e,o,r;
 		for(n.currentHealth(0),t.currentHealth(0),c=n.generation>t.generation?n.generation+1:t.generation+1,c>this.generations()&&this.generations(c),this.achievementCounts[7].Update(this.generations()),y=CoinFlip()?0:1,u=this.DefaultCritter(y,1,c),r=0;
@@ -710,7 +710,7 @@ var ticksPerSecond=20,game,GameController=function()
 		this.newestBorn(u.id);
 		this.Sort()
 	}
-	,n.prototype.NewGene=function(n)
+	,gameModel.prototype.NewGene=function(n)
 		{
 		var e=RandomInRange(1,this.newGeneChanceRange),r,i,t,f,u;
 		if(e<=this.newGeneChance())for(this.missNewGene(0),r=!1,i=0;
@@ -730,19 +730,19 @@ var ticksPerSecond=20,game,GameController=function()
 		}
 		else this.missNewGene(this.missNewGene()+1)
 	}
-	,n.prototype.TogglePauseBreeding=function()
+	,gameModel.prototype.TogglePauseBreeding=function()
 		{
 		this.pauseBreeding(!this.pauseBreeding())
 	}
-	,n.prototype.TogglePauseExplore=function()
+	,gameModel.prototype.TogglePauseExplore=function()
 		{
 		this.pauseExplore(!this.pauseExplore())
 	}
-	,n.prototype.TogglePauseAutoBattle=function()
+	,gameModel.prototype.TogglePauseAutoBattle=function()
 		{
 		this.pauseAutoBattle(!this.pauseAutoBattle())
 	}
-	,n.prototype.Select=function(n)
+	,gameModel.prototype.Select=function(n)
 		{
 		if(n.isLocked())
 			{
@@ -751,43 +751,43 @@ var ticksPerSecond=20,game,GameController=function()
 		}
 		n.job!=1&&n.job!=5&&n.job!=2&&(n.job!=3||this.inBattle())||n.isSelected(!n.isSelected())
 	}
-	,n.prototype.Lock=function(n)
+	,gameModel.prototype.Lock=function(n)
 		{
 		n.job==1&&(n.isSelected(!1),n.isLocked(!n.isLocked()))
 	}
-	,n.prototype.Move=function(n,t,i,r)
+	,gameModel.prototype.Move=function(currentTab,t,i,eventKeys)
 		{
-		var f,o,l,a,p,e,u;
+		var targetMound,o,l,a,p,e,unit;
 		switch(t)
 			{
-			case"Male":f=this.maleMound;
+			case"Male":targetMound=this.maleMound;
 			break;
-			case"Female":f=this.femaleMound;
+			case"Female":targetMound=this.femaleMound;
 			break;
-			case"Prince":f=this.princeMound;
+			case"Prince":targetMound=this.princeMound;
 			break;
-			case"Princess":f=this.princessMound;
+			case"Princess":targetMound=this.princessMound;
 			break;
-			case"Mine":f=this.mineMound;
+			case"Mine":targetMound=this.mineMound;
 			break;
-			case"Farm":f=this.farmMound;
+			case"Farm":targetMound=this.farmMound;
 			break;
-			case"Carrier":f=this.carrierMound;
+			case"Carrier":targetMound=this.carrierMound;
 			break;
-			case"Factory":f=this.factoryMound;
+			case"Factory":targetMound=this.factoryMound;
 			break;
-			case"Army":f=this.armyMound
+			case"Army":targetMound=this.armyMound
 		}
-		if(o=r.shiftKey||r.ctrlKey?f.removeAll():f.remove(function(n)
+		if(o=eventKeys.shiftKey||eventKeys.ctrlKey?targetMound.removeAll():targetMound.remove(function(n)
 			{
 			return n.isSelected()
 		}
-		),o.length==0&&(o=[f.shift()]),o[0]==undefined)
+		),o.length==0&&(o=[targetMound.shift()]),o[0]==undefined)
 			{
 			$(".tabcontents").notify("The mound is empty","Info");
 			return
 		}
-		switch(n)
+		switch(currentTab)
 			{
 			case"Mate":case"MateYoung":for(e=0;
 			e<o.length;
@@ -796,18 +796,18 @@ var ticksPerSecond=20,game,GameController=function()
 				if(e>0)
 					{
 					o[e].isSelected(!1);
-					f.unshift(o[e]);
+					targetMound.unshift(o[e]);
 					continue
 				}
-				if(u=o[e],u.isLocked())
+				if(unit=o[e],unit.isLocked())
 					{
-					f.unshift(u);
+					targetMound.unshift(unit);
 					$(".tabcontents").notify("Shift click to unlock that critter","Info");
 					continue
 				}
-				u.job=0;
-				u.isSelected(!1);
-				u.gender==0&&n=="Mate"?(this.mother(u),this.mother().currentHealth(0)):u.gender==1&&n=="Mate"?(this.father(u),this.father().currentHealth(0)):u.gender==0&&n=="MateYoung"?(l=this.princess().currentHealth()/this.princess().health*this.princess().score,this.princess(u),this.princess().currentHealth(l/this.princess().score*5*this.princess().health)):u.gender==1&&n=="MateYoung"&&(a=this.prince().currentHealth()/this.prince().health*this.prince().score,this.prince(u),this.prince().currentHealth(a/this.prince().score*5*this.prince().health));
+				unit.job=0;
+				unit.isSelected(!1);
+				unit.gender==0&&currentTab=="Mate"?(this.mother(unit),this.mother().currentHealth(0)):unit.gender==1&&currentTab=="Mate"?(this.father(unit),this.father().currentHealth(0)):unit.gender==0&&currentTab=="MateYoung"?(l=this.princess().currentHealth()/this.princess().health*this.princess().score,this.princess(unit),this.princess().currentHealth(l/this.princess().score*5*this.princess().health)):unit.gender==1&&currentTab=="MateYoung"&&(a=this.prince().currentHealth()/this.prince().health*this.prince().score,this.prince(unit),this.prince().currentHealth(a/this.prince().score*5*this.prince().health));
 				this.Sort()
 			}
 			break;
@@ -815,17 +815,21 @@ var ticksPerSecond=20,game,GameController=function()
 			e<o.length;
 			e++)
 				{
-				if(u=o[e],u.isLocked())
+				if(unit=o[e],unit.isLocked())
 					{
-					f.unshift(u);
+					targetMound.unshift(unit);
 					$(".tabcontents").notify("Shift click to unlock that critter","Info");
 					continue
 				}
-				u.job=2;
-				u.isSelected(!1);
-				f.remove(u);
-				var h=u.dirtPerSecond>this.lowestMiner()||this.mineMound().length<this.maxMineMoundSize(),c=u.grassPerSecond>this.lowestFarmer()||this.farmMound().length<this.maxFarmMoundSize(),v=u.carryPerSecond>this.lowestCarrier()||this.carrierMound().length<this.maxCarrierMoundSize(),y=u.sodPerSecond>this.lowestFactory()||this.factoryMound().length<this.maxFactoryMoundSize(),s=Math.min(this.dirtPerSecondRaw(),this.grassPerSecondRaw(),this.carryPerSecondRaw(),this.sodPerSecondRaw());
-				h&&s==this.dirtPerSecondRaw()?this.mineMound.unshift(u):c&&s==this.grassPerSecondRaw()?this.farmMound.unshift(u):v&&s==this.carryPerSecondRaw()?this.carrierMound.unshift(u):y&&s==this.sodPerSecondRaw()?this.factoryMound.unshift(u):h&&c?(p=Math.min(this.dirtPerSecondRaw(),this.grassPerSecondRaw()),p==this.dirtPerSecondRaw()?this.mineMound.unshift(u):this.farmMound.unshift(u)):h?this.mineMound.unshift(u):c?this.farmMound.unshift(u):v?this.carrierMound.unshift(u):y&&this.factoryMound.unshift(u);
+				unit.job=2;
+				unit.isSelected(!1);
+				targetMound.remove(unit);
+				var shouldBeMiner=unit.dirtPerSecond>this.lowestMiner()||this.mineMound().length<this.maxMineMoundSize(),
+					shouldBeFarmer=unit.grassPerSecond>this.lowestFarmer()||this.farmMound().length<this.maxFarmMoundSize(),
+					shouldBeCarrier=unit.carryPerSecond>this.lowestCarrier()||this.carrierMound().length<this.maxCarrierMoundSize(),
+					shouldBeFactoryWorker=unit.sodPerSecond>this.lowestFactory()||this.factoryMound().length<this.maxFactoryMoundSize(),
+					lowestWorkerProductionRate=Math.min(this.dirtPerSecondRaw(),this.grassPerSecondRaw(),this.carryPerSecondRaw(),this.sodPerSecondRaw());
+				shouldBeMiner&&lowestWorkerProductionRate==this.dirtPerSecondRaw()?this.mineMound.unshift(unit):shouldBeFarmer&&lowestWorkerProductionRate==this.grassPerSecondRaw()?this.farmMound.unshift(unit):shouldBeCarrier&&lowestWorkerProductionRate==this.carryPerSecondRaw()?this.carrierMound.unshift(unit):shouldBeFactoryWorker&&lowestWorkerProductionRate==this.sodPerSecondRaw()?this.factoryMound.unshift(unit):shouldBeMiner&&shouldBeFarmer?(p=Math.min(this.dirtPerSecondRaw(),this.grassPerSecondRaw()),p==this.dirtPerSecondRaw()?this.mineMound.unshift(unit):this.farmMound.unshift(unit)):shouldBeMiner?this.mineMound.unshift(unit):shouldBeFarmer?this.farmMound.unshift(unit):shouldBeCarrier?this.carrierMound.unshift(unit):shouldBeFactoryWorker&&this.factoryMound.unshift(unit);
 				this.Sort();
 				this.UpdateProduction()
 			}
@@ -834,16 +838,16 @@ var ticksPerSecond=20,game,GameController=function()
 			e<o.length;
 			e++)
 				{
-				if(u=o[e],u.isLocked())
+				if(unit=o[e],unit.isLocked())
 					{
-					f.unshift(u);
+					targetMound.unshift(unit);
 					$(".tabcontents").notify("Shift click to unlock that critter","Info");
 					continue
 				}
-				u.isSelected(!1);
-				u.job=3;
-				f.remove(u);
-				this.armyMound.unshift(u)
+				unit.isSelected(!1);
+				unit.job=3;
+				targetMound.remove(unit);
+				this.armyMound.unshift(unit)
 			}
 			this.Sort();
 			this.UpdateArmyUpgrades();
@@ -852,28 +856,28 @@ var ticksPerSecond=20,game,GameController=function()
 			e<o.length;
 			e++)
 				{
-				if(u=o[e],u.isLocked())
+				if(unit=o[e],unit.isLocked())
 					{
-					f.unshift(u);
+					targetMound.unshift(unit);
 					$(".tabcontents").notify("Shift click to unlock that critter","Info");
 					continue
 				}
-				f.remove(u)
+				targetMound.remove(unit)
 			}
 			this.UpdateProduction();
 			this.UpdateArmyUpgrades()
 		}
 		this.newestBorn(0)
 	}
-	,n.prototype.Boost=function()
+	,gameModel.prototype.Boost=function()
 		{
 		this.boosts()<1||(this.boosts(Math.round((this.boosts()-1)*10)/10),this.BreedCheck(!0))
 	}
-	,n.prototype.Buy=function(n,t)
+	,gameModel.prototype.Buy=function(n,t)
 		{
 		return this.sodRaw()>=n?(this.sodRaw(this.sodRaw()-n),!0):($(".tabcontents").notify("Not enough sod to build upgrade to the "+t+" Mound","Info"),!1)
 	}
-	,n.prototype.Upgrade=function(n)
+	,gameModel.prototype.Upgrade=function(n)
 		{
 		switch(n)
 			{
@@ -905,7 +909,7 @@ var ticksPerSecond=20,game,GameController=function()
 			this.Buy(this.armyMoundUpgradeCost(),"Barracks Upgrade")&&this.maxArmyMoundSize(this.maxArmyMoundSize()+1)
 		}
 	}
-	,n.prototype.StartWar=function(n)
+	,gameModel.prototype.StartWar=function(n)
 		{
 		this.map(new GameMap);
 		this.nation(n);
@@ -917,7 +921,7 @@ var ticksPerSecond=20,game,GameController=function()
 		this.UpdateArmyUpgrades();
 		this.Save()
 	}
-	,n.prototype.EndWar=function()
+	,gameModel.prototype.EndWar=function()
 		{
 		var t=this.nation().mapComplete()?this.nation().mapComplete():confirm("Are you sure you want to end this war?  You haven't finished this map yet and you'll have to start over."),n;
 		if(t)
@@ -930,11 +934,11 @@ var ticksPerSecond=20,game,GameController=function()
 			this.Save()
 		}
 	}
-	,n.prototype.MapSelect=function(n)
+	,gameModel.prototype.MapSelect=function(n)
 		{
 		n.isUnlocked()&&!n.isCleared()&&(this.map().currentBattle=n.coords,this.StartBattle())
 	}
-	,n.prototype.StartBattle=function()
+	,gameModel.prototype.StartBattle=function()
 		{
 		var n,t;
 		if(this.armyMound().length==0)
@@ -954,7 +958,7 @@ var ticksPerSecond=20,game,GameController=function()
 		}
 		)
 	}
-	,n.prototype.Battle=function()
+	,gameModel.prototype.Battle=function()
 		{
 		var f,e,h,r,o,p,c,i,t,u,b,s,w,n;
 		if(this.inBattle())if(this.battleTurnClock<=0)
@@ -1077,7 +1081,7 @@ var ticksPerSecond=20,game,GameController=function()
 		n<this.armyMound().length;
 		n++)this.armyMound()[n].currentHealth()<this.armyMound()[n].health&&(this.armyMound()[n].currentHealth(this.armyMound()[n].currentHealth()+this.armyMound()[n].health/this.armyMound()[n].actionTime*(1+this.armyUpgrades().medicBonus()/100)),this.armyMound()[n].currentHealth()>this.armyMound()[n].health&&this.armyMound()[n].currentHealth(this.armyMound()[n].health))
 	}
-	,n.prototype.UpdateArmyUpgrades=function()
+	,gameModel.prototype.UpdateArmyUpgrades=function()
 		{
 		var t,n;
 		for(this.armyUpgrades().generalBonus(0),this.armyUpgrades().scoutBonus(0),this.armyUpgrades().medicBonus(0),this.armyUpgrades().hasGeneral(!1),this.armyUpgrades().hasScout(!1),this.armyUpgrades().hasMedic(!1),t=0,n=0;
@@ -1102,26 +1106,26 @@ var ticksPerSecond=20,game,GameController=function()
 			default:this.armyMound()[n].rank(this.armyMound()[n].level()<8?"Soldier":this.armyMound()[n].level()<15?"Veteran":"Elite")
 		}
 	}
-	,n.prototype.AutoBattle=function()
+	,gameModel.prototype.AutoBattle=function()
 		{
 		var n,t;
 		this.atWar()&&!this.pauseAutoBattle()&&(this.autoBattleClock()<=0?(this.autoBattleClock(this.autoBattleTime),this.map().SetRandomBattle()&&this.StartBattle()):!this.inBattle()&&this.map().tilesCleared()<this.map().tileCount()&&this.armyUpgrades().hasGeneral()?(n=this.nation().fortFound()?50:0,n+=this.nation().isDefeated()?100:0,n+=this.armyUpgrades().generalBonus(),t=1*(1+n/100),this.autoBattleClock(this.autoBattleClock()-t),this.autoBattleClock()<0&&this.autoBattleClock(0)):this.armyUpgrades().hasGeneral()||this.autoBattleClock(this.autoBattleTime))
 	}
-	,n.prototype.Explore=function()
+	,gameModel.prototype.Explore=function()
 		{
 		var n,t;
 		this.atWar()&&!this.pauseExplore()&&(this.exploreClock()<=0?(this.exploreClock(this.exploreTime),this.map().Explore(null)):!this.inBattle()&&this.map().canExplore()&&this.armyUpgrades().hasScout()?(n=this.nation().exploreFound()?50:0,n+=this.nation().isDefeated()?100:0,n+=this.armyUpgrades().scoutBonus(),t=1*(1+n/100),this.exploreClock(this.exploreClock()-t),this.exploreClock()<0&&this.exploreClock(0)):this.armyUpgrades().hasScout()||this.exploreClock(this.exploreTime))
 	}
-	,n.prototype.AcknowledgeTreasure=function()
+	,gameModel.prototype.AcknowledgeTreasure=function()
 		{
 		this.showTreasure(!1)
 	}
-	,n.prototype.Reset=function()
+	,gameModel.prototype.Reset=function()
 		{
 		localStorage.clear();
 		location.reload()
 	}
-	,n.prototype.CheckAchievements=function()
+	,gameModel.prototype.CheckAchievements=function()
 		{
 		if(this.achievementCheck<=0)
 			{
@@ -1132,7 +1136,7 @@ var ticksPerSecond=20,game,GameController=function()
 		}
 		else this.achievementCheck--
 	}
-	,n.prototype.AnimateWorkers=function()
+	,gameModel.prototype.AnimateWorkers=function()
 		{
 		for(var n=0;
 		n<this.mineMound().length;
@@ -1147,11 +1151,11 @@ var ticksPerSecond=20,game,GameController=function()
 		n<this.factoryMound().length;
 		n++)this.factoryMound()[n].currentHealth(this.factoryMound()[n].currentHealth()+this.factoryMound()[n].health/this.factoryMound()[n].actionTime),this.factoryMound()[n].currentHealth()>=this.factoryMound()[n].health&&this.factoryMound()[n].currentHealth(0)
 	}
-	,n.prototype.CheckSave=function()
+	,gameModel.prototype.CheckSave=function()
 		{
 		this.saveCheck<=0?(this.sodPerSecondRaw()>=100&&this.isHeirsUnlocked(!0),this.Save(),this.saveCheck=60*ticksPerSecond):this.saveCheck--
 	}
-	,n.prototype.Sort=function()
+	,gameModel.prototype.Sort=function()
 		{
 		for(var t=this.maleMound().length,n;
 		this.maleMound().length>this.maxMaleMoundSize();
@@ -1206,7 +1210,7 @@ var ticksPerSecond=20,game,GameController=function()
 		while(this.armyMound().length>this.maxArmyMoundSize())this.armyMound.pop();
 		this.UpdateArmyUpgrades()
 	}
-	,n.prototype.SortMound=function(n,t)
+	,gameModel.prototype.SortMound=function(n,t)
 		{
 		n.sort(function(n,t)
 			{
@@ -1294,27 +1298,27 @@ var ticksPerSecond=20,game,GameController=function()
 			)
 		}
 	}
-	,n.prototype.CalculateExpression=function(n,t)
+	,gameModel.prototype.CalculateExpression=function(n,t)
 		{
 		return n==0&&t==0?0:n==2&&t==2?2:n==1&&t==1?CoinFlip()?1:CoinFlip()?2:0:n==2&&t==1||n==1&&t==2?CoinFlip()?1:2:n==0&&t==1||n==1&&t==0?CoinFlip()?1:0:n==0&&t==2||n==2&&t==0?1:void 0
 	}
-	,n.prototype.MutateStat=function(n,t,i,r)
+	,gameModel.prototype.MutateStat=function(n,t,i,r)
 		{
 		var f=n<t?n-StatVariance(n):t-StatVariance(t),e=n>t?n+StatVariance(n):t+StatVariance(t),u=RandomInRange(f,e);
 		return u<i&&(u=i),u>r&&(u=r),u
 	}
-	,n.prototype.DefaultCritter=function(n,t,i)
+	,gameModel.prototype.DefaultCritter=function(n,t,i)
 		{
 		this.achievementCounts[6].Update(this.achievementCounts[6].value+1);
 		var r=new Critter(i,this.achievementCounts[6].value,n);
 		return r.job=t,r
 	}
-	,n.prototype.Save=function()
+	,gameModel.prototype.Save=function()
 		{
 		var n=new GameSave,t;
 		return n.version="1.0",n.dirtRaw=this.dirtRaw(),n.grassRaw=this.grassRaw(),n.sodRaw=this.sodRaw(),n.factoryDirtRaw=this.factoryDirtRaw(),n.factoryGrassRaw=this.factoryGrassRaw(),n.generations=this.generations(),n.mother=this.mother(),n.father=this.father(),n.princess=this.princess(),n.prince=this.prince(),n.sodDedicatedToBreeding=this.sodDedicatedToBreeding(),n.isHeirsUnlocked=this.isHeirsUnlocked(),n.femaleMound=this.femaleMound(),n.maleMound=this.maleMound(),n.princessMound=this.princessMound(),n.princeMound=this.princeMound(),n.mineMound=this.mineMound(),n.farmMound=this.farmMound(),n.carrierMound=this.carrierMound(),n.factoryMound=this.factoryMound(),n.armyMound=this.armyMound(),n.maxFemaleMoundSize=this.maxFemaleMoundSize(),n.maxMaleMoundSize=this.maxMaleMoundSize(),n.maxPrincessMoundSize=this.maxPrincessMoundSize(),n.maxPrinceMoundSize=this.maxPrinceMoundSize(),n.maxMineMoundSize=this.maxMineMoundSize(),n.bonusMinePercent=this.bonusMinePercent(),n.bonusFarmPercent=this.bonusFarmPercent(),n.bonusCarrierPercent=this.bonusCarrierPercent(),n.bonusFactoryPercent=this.bonusFactoryPercent(),n.maxFarmMoundSize=this.maxFarmMoundSize(),n.maxCarrierMoundSize=this.maxCarrierMoundSize(),n.maxFactoryMoundSize=this.maxFactoryMoundSize(),n.maxArmyMoundSize=this.maxArmyMoundSize(),n.femaleSort=this.femaleSort(),n.maleSort=this.maleSort(),n.princessSort=this.princessSort(),n.princeSort=this.princeSort(),n.armySort=this.armySort(),n.map=this.map(),n.tiles=this.map().tiles(),n.atWar=this.atWar(),n.nations=this.nations(),n.nation=this.nation(),n.achievements=this.achievements(),n.achievementCounts=this.achievementCounts,n.achievementsUnlocked=this.achievementsUnlocked(),n.battleTurnLength=this.battleTurnLength(),n.boosts=this.boosts(),n.maxBoosts=this.maxBoosts(),n.armyUpgrades=this.armyUpgrades(),t=$.base64.encode(ko.toJSON(n)),localStorage.setItem("game2",t),$(".tabcontents").notify("Game Saved","info"),this.saveCheck=60*ticksPerSecond,t
 	}
-	,n.prototype.Load=function(n)
+	,gameModel.prototype.Load=function(n)
 		{
 		var t,u,s,f,e,o,h,i,r;
 		try
@@ -1394,7 +1398,7 @@ var ticksPerSecond=20,game,GameController=function()
 		}
 		n!=null&&this.Save()
 	}
-	,n
+	,gameModel
 }
 (),Critter=function()
 	{
