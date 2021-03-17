@@ -829,7 +829,7 @@ var ticksPerSecond=20,game,GameController=function()
 				var shouldBeMiner=this.mineMound().length<this.maxMineMoundSize(),
 					shouldBeFarmer=this.farmMound().length<this.maxFarmMoundSize(),
 					shouldBeCarrier=this.carrierMound().length<this.maxCarrierMoundSize(),
-					shouldBeFactoryWorker=this.factoryMound().length<this.maxFactoryMoundSize(),
+					shouldBeFactoryWorker=this.factoryMound().length<this.maxFactoryMoundSize();
 
 				if(!(shouldBeMiner || shouldBeFarmer || shouldBeCarrier || shouldBeFactoryWorker))
 				{
