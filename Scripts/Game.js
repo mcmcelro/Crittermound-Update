@@ -824,11 +824,21 @@ var ticksPerSecond=20,game,GameController=function()
 				unit.job=2;
 				unit.isSelected(!1);
 				targetMound.remove(unit);
-				var shouldBeMiner=unit.dirtPerSecond>this.lowestMiner()||this.mineMound().length<this.maxMineMoundSize(),
-					shouldBeFarmer=unit.grassPerSecond>this.lowestFarmer()||this.farmMound().length<this.maxFarmMoundSize(),
-					shouldBeCarrier=unit.carryPerSecond>this.lowestCarrier()||this.carrierMound().length<this.maxCarrierMoundSize(),
-					shouldBeFactoryWorker=unit.sodPerSecond>this.lowestFactory()||this.factoryMound().length<this.maxFactoryMoundSize(),
-					lowestWorkerProductionRate=Math.min(this.dirtPerSecondRaw(),this.grassPerSecondRaw(),this.carryPerSecondRaw(),this.sodPerSecondRaw());
+				// prioritize filling in a gap in a worker group if one exists.
+				// otherwise make it replace the lowest-rated worker in the order of miner, farmer, carrier, factory worker.
+				var shouldBeMiner=this.mineMound().length<this.maxMineMoundSize(),
+					shouldBeFarmer=this.farmMound().length<this.maxFarmMoundSize(),
+					shouldBeCarrier=this.carrierMound().length<this.maxCarrierMoundSize(),
+					shouldBeFactoryWorker=this.factoryMound().length<this.maxFactoryMoundSize(),
+
+				if(!(shouldBeMiner || shouldBeFarmer || shouldBeCarrier || shouldBeFactoryWorker))
+				{
+					shouldBeMiner=unit.dirtPerSecond>this.lowestMiner();
+					shouldBeFarmer=unit.grassPerSecond>this.lowestFarmer();
+					shouldBeCarrier=unit.carryPerSecond>this.lowestCarrier();
+					shouldBeFactoryWorker=unit.sodPerSecond>this.lowestFactory();
+				}
+				var lowestWorkerProductionRate=Math.min(this.dirtPerSecondRaw(),this.grassPerSecondRaw(),this.carryPerSecondRaw(),this.sodPerSecondRaw());
 				shouldBeMiner&&lowestWorkerProductionRate==this.dirtPerSecondRaw()?this.mineMound.unshift(unit):shouldBeFarmer&&lowestWorkerProductionRate==this.grassPerSecondRaw()?this.farmMound.unshift(unit):shouldBeCarrier&&lowestWorkerProductionRate==this.carryPerSecondRaw()?this.carrierMound.unshift(unit):shouldBeFactoryWorker&&lowestWorkerProductionRate==this.sodPerSecondRaw()?this.factoryMound.unshift(unit):shouldBeMiner&&shouldBeFarmer?(p=Math.min(this.dirtPerSecondRaw(),this.grassPerSecondRaw()),p==this.dirtPerSecondRaw()?this.mineMound.unshift(unit):this.farmMound.unshift(unit)):shouldBeMiner?this.mineMound.unshift(unit):shouldBeFarmer?this.farmMound.unshift(unit):shouldBeCarrier?this.carrierMound.unshift(unit):shouldBeFactoryWorker&&this.factoryMound.unshift(unit);
 				this.Sort();
 				this.UpdateProduction()
